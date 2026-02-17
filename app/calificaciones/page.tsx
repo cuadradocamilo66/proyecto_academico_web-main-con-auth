@@ -1,3 +1,4 @@
+"use client"
 import { AppShell } from "@/components/layout/app-shell"
 import { CalificacionesList } from "@/components/grades/grades-table"
 import { Button } from "@/components/ui/button"

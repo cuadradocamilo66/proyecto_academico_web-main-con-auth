@@ -1,3 +1,4 @@
+"use client"
 import { AppShell } from "@/components/layout/app-shell"
 import { AgendaView } from "@/components/agenda/agenda-view"
 import { Button } from "@/components/ui/button"

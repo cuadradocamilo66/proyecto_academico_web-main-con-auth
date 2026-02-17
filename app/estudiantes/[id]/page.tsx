@@ -1,3 +1,4 @@
+"use client"
 import { AppShell } from "@/components/layout/app-shell"
 import { StudentProfile } from "@/components/students/student-profile"
 import { Button } from "@/components/ui/button"

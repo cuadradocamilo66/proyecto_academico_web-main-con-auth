@@ -1,3 +1,4 @@
+"use client"
 import { AppShell } from "@/components/layout/app-shell"
 import { PlanningView } from "@/components/planning/planning-view"
 import { Button } from "@/components/ui/button"

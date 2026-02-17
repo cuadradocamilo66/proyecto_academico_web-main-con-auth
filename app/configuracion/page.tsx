@@ -1,3 +1,4 @@
+"use client"
 import { AppShell } from "@/components/layout/app-shell"
 import { SettingsView } from "@/components/settings/settings-view"
 
