@@ -452,6 +452,7 @@ export interface ObservationDB {
 }
 
 export interface Observation {
+  course_name: any
   id: string
   studentId: string
   studentName: string
