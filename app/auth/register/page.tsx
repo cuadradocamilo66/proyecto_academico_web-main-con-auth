@@ -40,7 +40,7 @@ export default function RegisterPage() {
     if (!formData.firstName.trim()) {
       return "El nombre es requerido"
     }
-    
+
     // Validar apellido
     if (!formData.lastName.trim()) {
       return "El apellido es requerido"
@@ -96,7 +96,7 @@ export default function RegisterPage() {
       console.log("Resultado del registro:", result)
 
       setSuccess(true)
-      
+
       // Redirigir después de 2 segundos
       setTimeout(() => {
         router.push("/dashboardd")
@@ -138,7 +138,7 @@ export default function RegisterPage() {
   // Calcular fuerza de la contraseña
   const getPasswordStrength = (password: string) => {
     if (!password) return { strength: 0, label: "", color: "" }
-    
+
     let strength = 0
     if (password.length >= 6) strength++
     if (password.length >= 8) strength++
@@ -164,10 +164,10 @@ export default function RegisterPage() {
             </div>
           </div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            EduGestión
+            SIED Pro
           </h1>
           <p className="text-gray-600 dark:text-gray-400">
-            Plataforma de Gestión Docente
+            Sistema Institucional Educativo Docente
           </p>
         </div>
 
@@ -358,7 +358,7 @@ export default function RegisterPage() {
 
         {/* Footer */}
         <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-8">
-          © 2026 EduGestión. Todos los derechos reservados.
+          © 2026 SIED Pro. Todos los derechos reservados.
         </p>
       </div>
     </div>

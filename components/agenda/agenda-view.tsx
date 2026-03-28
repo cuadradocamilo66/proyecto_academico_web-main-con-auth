@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { Event, CreateEventData } from "@/lib/types"
 import { fetchEventsByMonth, createEvent, deleteEvent } from "@/lib/agenda-service"
+import { useLoading } from "@/lib/loading-context"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Calendar } from "@/components/ui/calendar"
 import { Badge } from "@/components/ui/badge"
@@ -50,6 +51,7 @@ export function AgendaView() {
   const [currentDate, setCurrentDate] = useState(new Date())
   const [events, setEvents] = useState<Event[]>([])
   const [loading, setLoading] = useState(true)
+  const { showLoading, showSuccess, hideLoading } = useLoading()
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date())
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -88,6 +90,7 @@ export function AgendaView() {
     if (!newEvent.title || !newEvent.date) return
 
     setIsSubmitting(true)
+    showLoading("Guardando evento...")
     try {
       await createEvent(newEvent)
       await loadEvents()
@@ -100,21 +103,27 @@ export function AgendaView() {
         type: "other",
         courseId: undefined,
       })
+      showSuccess("¡Evento guardado exitosamente!")
     } catch (error) {
       console.error("Failed to create event:", error)
     } finally {
       setIsSubmitting(false)
+      hideLoading()
     }
   }
 
   async function handleDeleteEvent(eventId: string) {
+    showLoading("Eliminando evento...")
     try {
       await deleteEvent(eventId)
       await loadEvents()
       setDeleteDialogOpen(false)
       setEventToDelete(null)
+      showSuccess("¡Evento eliminado exitosamente!")
     } catch (error) {
       console.error("Failed to delete event:", error)
+    } finally {
+      hideLoading()
     }
   }
 

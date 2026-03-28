@@ -18,6 +18,7 @@ import { fetchStudents, createStudent, updateStudent, deleteStudent } from "@/li
 import { fetchCourses } from "@/lib/courses-service"
 import useSWR from "swr"
 import router from "next/dist/shared/lib/router/router"
+import { useLoading } from "@/lib/loading-context"
 
 const statusLabels: Record<string, string> = {
   active: "Activo",
@@ -43,6 +44,7 @@ export function StudentsList() {
   const [searchTerm, setSearchTerm] = useState("")
   const [filterCourse, setFilterCourse] = useState<string>("all")
   const [filterStatus, setFilterStatus] = useState<string>("all")
+  const { showLoading, showSuccess, hideLoading } = useLoading()
 
 
   const filteredStudents = students.filter((student) => {
@@ -79,10 +81,18 @@ export function StudentsList() {
 
   const handleConfirmDelete = async () => {
     if (selectedStudent) {
-      await deleteStudent(selectedStudent.id)
-      mutate()
-      setDeleteDialogOpen(false)
-      setSelectedStudent(null)
+      showLoading("Eliminando estudiante...")
+      try {
+        await deleteStudent(selectedStudent.id)
+        mutate()
+        setDeleteDialogOpen(false)
+        setSelectedStudent(null)
+        showSuccess("¡Estudiante eliminado!")
+      } catch (e) {
+        console.error("Error al eliminar", e)
+      } finally {
+        hideLoading()
+      }
     }
   }
 
@@ -156,7 +166,7 @@ export function StudentsList() {
                 <tr className="border-b border-border text-left">
                   <th className="pb-3 text-sm font-medium text-muted-foreground">Estudiante</th>
                   <th className="pb-3 text-sm font-medium text-muted-foreground">Curso</th>
-                {/*   <th className="pb-3 text-sm font-medium text-muted-foreground">Edad</th> */}
+                  {/*   <th className="pb-3 text-sm font-medium text-muted-foreground">Edad</th> */}
                   <th className="pb-3 text-sm font-medium text-muted-foreground">Género</th>
                   <th className="pb-3 text-sm font-medium text-muted-foreground">Estado</th>
                   <th className="pb-3 text-sm font-medium text-muted-foreground">Acciones</th>
@@ -186,7 +196,10 @@ export function StudentsList() {
                             {student.lastName[0]}
                           </div>
                           <div>
-                            <p className="font-medium">{student.fullName}</p>
+                            <p className="font-medium">
+                              {student.fullName}
+                              <span className="text-muted-foreground ml-1 font-normal">({student.studentCode})</span>
+                            </p>
                             <p className="text-xs text-muted-foreground">
                               {student.documentType}: {student.documentNumber || "Sin documento"}
                             </p>

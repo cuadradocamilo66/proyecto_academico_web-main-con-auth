@@ -4,9 +4,13 @@ import { supabase } from "@/lib/supabase/client"
 
 
 export async function fetchActivities() {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return []
+
   const { data, error } = await supabase
     .from("activities")
     .select("*")
+    .eq("user_id", user.id)
     .order("created_at", { ascending: false })
 
   if (error) throw error
@@ -37,6 +41,7 @@ export async function fetchActivityGrades(activityId: string) {
 export async function updateActivity(activityId: string, updates: {
   title?: string
   description?: string
+  questions?: any[]
 }) {
   const { data, error } = await supabase
     .from("activities")
@@ -90,16 +95,22 @@ export interface CreateActivityData {
   periodId: string
   title: string
   description?: string
+  questions?: any[]
 }
 
 export async function createActivity(data: CreateActivityData) {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error("Debes iniciar sesión para crear actividades")
+
   const { data: activity, error } = await supabase
     .from("activities")
     .insert({
       course_id: data.courseId,
       period_id: data.periodId,
+      user_id: user.id,
       title: data.title,
       description: data.description ?? null,
+      questions: data.questions ?? []
     })
     .select()
 

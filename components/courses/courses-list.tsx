@@ -31,6 +31,7 @@ import { cn } from "@/lib/utils"
 import { CourseDialog } from "./course-dialog"
 import { DeleteCourseDialog } from "./delete-course-dialog"
 import { useAuth } from "@/lib/auth-context"
+import { useLoading } from "@/lib/loading-context"
 
 export function CoursesList() {
   const { user, loading } = useAuth()
@@ -45,6 +46,7 @@ export function CoursesList() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const { showLoading, showSuccess, hideLoading } = useLoading()
 
   if (loading || isLoading) {
     return (
@@ -81,6 +83,7 @@ export function CoursesList() {
     if (!user) return
 
     setIsSubmitting(true)
+    showLoading("Guardando curso...")
     try {
       if (courseData.id) {
         await updateCourse(courseData.id, courseData)
@@ -89,11 +92,13 @@ export function CoursesList() {
         await createCourse(user.id, courseData)
       }
       await mutate()
+      showSuccess("¡Curso guardado exitosamente!")
       setDialogOpen(false)
     } catch (error) {
       console.error("Error saving course:", error)
     } finally {
       setIsSubmitting(false)
+      hideLoading()
     }
   }
 
@@ -101,15 +106,18 @@ export function CoursesList() {
     if (!selectedCourse) return
 
     setIsSubmitting(true)
+    showLoading("Eliminando curso...")
     try {
       await deleteCourse(selectedCourse.id)
       await mutate()
       setDeleteDialogOpen(false)
       setSelectedCourse(null)
+      showSuccess("¡Curso eliminado exitosamente!")
     } catch (error) {
       console.error("Error deleting course:", error)
     } finally {
       setIsSubmitting(false)
+      hideLoading()
     }
   }
 

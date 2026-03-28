@@ -60,9 +60,10 @@ export function dbCourseToFrontend(dbCourse: CourseDB): Course {
 // ===============================
 
 export type GradeItem = {
+  id?: string
   value: number
   title?: string
-  createdAt: string
+  createdAt?: string
 }
 
 export type Grades = {
@@ -167,9 +168,9 @@ export interface StudentDB {
   photo_url: string | null
   notes: string | null
 
-  // ✅ jsonb con objetos
   grades: Grades | null
 
+  student_code: string | null
   created_at: string
   updated_at: string
 }
@@ -213,6 +214,7 @@ export interface Student {
   emergencyContactRelationship: string
   photoUrl: string
   notes: string
+  studentCode: string
 
   // ✅ mismo modelo que DB
   grades: Grades
@@ -289,6 +291,7 @@ export function dbStudentToFrontend(
       dbStudent.emergency_contact_relationship || "",
     photoUrl: dbStudent.photo_url || "",
     notes: dbStudent.notes || "",
+    studentCode: dbStudent.student_code || "",
 
     // ✅ SIEMPRE estructura válida
     grades: dbStudent.grades ?? emptyGrades,
@@ -359,17 +362,17 @@ export interface CreateWeeklyPlanningData {
 export function formatDateRange(startDate: string, endDate: string): string {
   const start = new Date(startDate)
   const end = new Date(endDate)
-  
+
   const months = [
     "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
     "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
   ]
-  
+
   const startDay = start.getDate()
   const endDay = end.getDate()
   const month = months[end.getMonth()]
   const year = end.getFullYear()
-  
+
   return `${startDay} - ${endDay} ${month} ${year}`
 }
 
@@ -488,6 +491,7 @@ export function dbObservationToFrontend(
     description: dbObservation.description,
     date: dbObservation.date,
     createdAt: dbObservation.created_at,
+    course_name: "", // Satisfy Observation type
   }
 }
 

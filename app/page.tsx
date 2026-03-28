@@ -12,7 +12,7 @@ export default function HomePage() {
     const checkAuthAndRedirect = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession()
-        
+
         if (session) {
           // Usuario autenticado → ir al dashboard
           console.log("Usuario autenticado, redirigiendo al dashboard...")

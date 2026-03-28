@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
@@ -16,11 +16,10 @@ import {
   BarChart3,
   CalendarDays,
   Settings,
-  GraduationCap,
-  LogOut,
+  LogOut
 } from "lucide-react"
-import { NavigationLoadingModal } from "@/components/ui/navigation-loading-modal"
 import { AuthLoadingModal } from "@/components/auth/auth-loading-modal"
+import { useLoading } from "@/lib/loading-context"
 
 const navigation = [
   { name: "Dashboard", href: "/dashboardd", icon: LayoutDashboard },
@@ -38,36 +37,21 @@ const navigation = [
 export function Sidebar() {
   const pathname = usePathname()
   const router = useRouter()
-  const { signOut } = useAuth()
-  
-  const [isNavigating, setIsNavigating] = useState(false)
-  const [navigationMessage, setNavigationMessage] = useState("")
-  const [navigationIcon, setNavigationIcon] = useState<React.ReactNode>(null)
+  const { signOut, profile } = useAuth()
+  const { showLoading } = useLoading()
+
   const [isLoggingOut, setIsLoggingOut] = useState(false)
+  console.log("PROFILE:", profile)
+  const fullName = profile
+    ? `Prof. ${profile.firstName} ${profile.lastName}`
+    : "Profesor"
 
-  const handleNavigation = (item: typeof navigation[0], e: React.MouseEvent) => {
-    // Si ya está en la página, no hacer nada
-    if (pathname === item.href) {
-      e.preventDefault()
-      return
-    }
 
-    // Mostrar modal de carga
-    setNavigationMessage(`Cargando ${item.name}...`)
-    setNavigationIcon(<item.icon />)
-    setIsNavigating(true)
-
-    // Navegar después de un pequeño delay para que se vea el modal
-    setTimeout(() => {
-      router.push(item.href)
-    }, 100)
-  }
 
   const handleLogout = async () => {
     try {
       setIsLoggingOut(true)
       await signOut()
-      // La redirección se maneja en signOut()
     } catch (error) {
       console.error("Error al cerrar sesión:", error)
       setIsLoggingOut(false)
@@ -76,51 +60,60 @@ export function Sidebar() {
 
   return (
     <>
-      {/* Modal de navegación */}
-      <NavigationLoadingModal 
-        isOpen={isNavigating} 
-        message={navigationMessage}
-        icon={navigationIcon}
-      />
-
-      {/* Modal de logout */}
+      {/* Modal logout */}
       <AuthLoadingModal isOpen={isLoggingOut} type="logout" />
 
-      <aside className="fixed left-0 top-0 z-40 flex h-screen w-64 flex-col bg-sidebar text-sidebar-foreground">
-        <div className="flex h-16 items-center gap-2 border-b border-sidebar-border px-6">
-          <GraduationCap className="h-8 w-8 text-sidebar-primary" />
-          <span className="text-lg font-semibold">EduGestión</span>
+      <aside
+        className="
+          fixed left-0 top-0 z-40 
+          flex h-screen w-64 flex-col 
+          bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900
+          text-slate-100 
+          shadow-2xl
+        "
+      >
+        {/* Header Logo */}
+        <div className="flex h-16 items-center border-b border-slate-700 px-6 shadow-sm">
+          <span className="text-sm font-semibold text-white tracking-wide">
+            Bienvenido, {fullName}
+          </span>
         </div>
 
+        {/* Navegación */}
         <nav className="flex flex-col gap-1 p-4">
           {navigation.map((item) => {
             const isActive = pathname === item.href
+
             return (
               <Link
                 key={item.name}
                 href={item.href}
-                onClick={(e) => handleNavigation(item, e)}
+                onClick={(e) => {
+                  if (pathname !== item.href) {
+                    showLoading(`Cargando ${item.name}...`)
+                  }
+                }}
                 className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                  "group flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200",
                   isActive
-                    ? "bg-sidebar-accent text-sidebar-primary"
-                    : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground",
-                  isNavigating && "pointer-events-none opacity-50"
+                    ? "bg-white/10 backdrop-blur-md text-white shadow-md border border-white/10"
+                    : "text-slate-300 hover:bg-white/5 hover:text-white hover:translate-x-1"
                 )}
               >
-                <item.icon className="h-5 w-5" />
+                <item.icon className="h-5 w-5 transition-transform duration-200 group-hover:scale-110" />
                 {item.name}
               </Link>
             )
           })}
         </nav>
 
-        <div className="mt-auto border-t border-sidebar-border p-4">
+        {/* Logout */}
+        <div className="mt-auto border-t border-slate-700 p-4">
           <button
             onClick={handleLogout}
             disabled={isLoggingOut}
             className={cn(
-              "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 dark:hover:bg-red-900/20",
+              "flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-red-400 transition-all duration-200 hover:bg-red-500/10 hover:text-red-300",
               isLoggingOut && "opacity-50 cursor-not-allowed"
             )}
           >

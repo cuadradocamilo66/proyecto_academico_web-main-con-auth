@@ -15,6 +15,7 @@ import type { CreateStudentData } from "@/lib/students-service"
 import { User, GraduationCap, Users, Loader2, CheckCircle2 } from "lucide-react"
 import useSWR from "swr"
 import { fetchCourses } from "@/lib/courses-service"
+import { useLoading } from "@/lib/loading-context"
 
 interface StudentDialogProps {
   open: boolean
@@ -47,6 +48,7 @@ const statusOptions = [
 export function StudentDialog({ open, onOpenChange, student, onSave }: StudentDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [activeTab, setActiveTab] = useState("personal")
+  const { showLoading, showSuccess, hideLoading } = useLoading()
 
   const { data: courses = [] } = useSWR<Course[]>("courses", fetchCourses)
 
@@ -103,6 +105,7 @@ export function StudentDialog({ open, onOpenChange, student, onSave }: StudentDi
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
+    showLoading("Guardando estudiante...")
 
     try {
       // 🔒 VALIDACIÓN CLAVE
@@ -120,20 +123,20 @@ export function StudentDialog({ open, onOpenChange, student, onSave }: StudentDi
         await onSave(formData)
       }
 
+      showSuccess("¡Estudiante guardado exitosamente!")
       onOpenChange(false)
-    }  catch (error: unknown) {
-  if (error instanceof Error) {
-    console.error("Error saving student:", error.message)
-    console.error(error.stack)
-  } else {
-    console.error("Error saving student (raw):", JSON.stringify(error, null, 2))
-  }
-}
- finally {
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error("Error saving student:", error.message)
+        console.error(error.stack)
+      } else {
+        console.error("Error saving student (raw):", JSON.stringify(error, null, 2))
+      }
+    } finally {
       setIsSubmitting(false)
+      hideLoading()
     }
   }
-
 
   const updateField = (field: keyof CreateStudentData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
@@ -220,7 +223,7 @@ export function StudentDialog({ open, onOpenChange, student, onSave }: StudentDi
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="documentType" className="text-sm font-medium">
-                        Tipo de Documento <span className="text-destructive">*</span>
+                        Tipo de Documento
                       </Label>
                       <Select
                         value={formData.documentType}
@@ -240,7 +243,7 @@ export function StudentDialog({ open, onOpenChange, student, onSave }: StudentDi
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="documentNumber" className="text-sm font-medium">
-                        Número de Documento <span className="text-destructive">*</span>
+                        Número de Documento
                       </Label>
                       <Input
                         id="documentNumber"
@@ -248,8 +251,10 @@ export function StudentDialog({ open, onOpenChange, student, onSave }: StudentDi
                         onChange={(e) => updateField("documentNumber", e.target.value)}
                         placeholder="Ej: 1000123456"
                         className="h-10"
-                        required
                       />
+                      <p className="text-xs text-muted-foreground">
+                        Opcional - Puedes agregarlo más tarde
+                      </p>
                     </div>
                   </div>
 
@@ -270,8 +275,6 @@ export function StudentDialog({ open, onOpenChange, student, onSave }: StudentDi
                       </SelectContent>
                     </Select>
                   </div>
-
-
                 </div>
               </TabsContent>
 

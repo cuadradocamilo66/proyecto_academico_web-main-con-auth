@@ -29,19 +29,19 @@ export default function LoginPage() {
 
     try {
       console.log("🔵 Intentando iniciar sesión...")
-      
+
       await signIn(email, password)
-      
+
       console.log("✅ Login exitoso!")
-      
+
       // El loading modal seguirá visible durante la redirección
       window.location.href = '/dashboardd'
-      
+
     } catch (err: any) {
       console.error("❌ Error de login:", err)
-      
+
       let errorMessage = "Error al iniciar sesión. Por favor, intenta de nuevo."
-      
+
       if (err.message?.includes("Invalid login credentials")) {
         errorMessage = "Correo electrónico o contraseña incorrectos"
       } else if (err.message?.includes("Email not confirmed")) {
@@ -51,7 +51,7 @@ export default function LoginPage() {
       } else if (err.message) {
         errorMessage = err.message
       }
-      
+
       setError(errorMessage)
       setLoading(false)
     }
@@ -72,10 +72,10 @@ export default function LoginPage() {
               </div>
             </div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-              EduGestión
+              SIED Pro
             </h1>
             <p className="text-gray-600 dark:text-gray-400">
-              Plataforma de Gestión Docente
+              Sistema Institucional Educativo Docente
             </p>
           </div>
 
@@ -181,10 +181,28 @@ export default function LoginPage() {
                   )}
                 </Button>
 
-                <div className="text-center text-sm text-gray-600 dark:text-gray-400">
+                <div className="relative my-4">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-background px-2 text-muted-foreground">
+                      ¿Eres estudiante?
+                    </span>
+                  </div>
+                </div>
+
+                <Button variant="outline" type="button" className="w-full border-2 border-primary/20 hover:border-primary/50 hover:bg-primary/5" asChild>
+                  <Link href="/join">
+                    <GraduationCap className="mr-2 h-4 w-4 text-primary" />
+                    Unirse a clase con código
+                  </Link>
+                </Button>
+
+                <div className="text-center text-sm text-gray-600 dark:text-gray-400 pt-2">
                   ¿No tienes una cuenta?{" "}
-                  <Link 
-                    href="/auth/register" 
+                  <Link
+                    href="/auth/register"
                     className="text-primary font-medium hover:underline"
                     tabIndex={loading ? -1 : 0}
                   >
@@ -197,7 +215,7 @@ export default function LoginPage() {
 
           {/* Footer */}
           <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-8">
-            © 2026 EduGestión. Todos los derechos reservados.
+            © 2026 SIED Pro. Todos los derechos reservados.
           </p>
         </div>
       </div>

@@ -72,10 +72,10 @@ export async function fetchStudents(): Promise<Student[]> {
   return data.map((student: any) => {
     const courseName = student.course
       ? formatCourseName(
-          student.course.subject,
-          student.course.grade,
-          student.course.group_number
-        )
+        student.course.subject,
+        student.course.grade,
+        student.course.group_number
+      )
       : undefined
 
     const grades: Grades = {
@@ -156,10 +156,10 @@ export async function fetchStudentsByCourse(courseId: string): Promise<Student[]
   return data.map((student: StudentDB & { course?: any }) => {
     const courseName = student.course
       ? formatCourseName(
-          student.course.subject,
-          student.course.grade,
-          student.course.group_number
-        )
+        student.course.subject,
+        student.course.grade,
+        student.course.group_number
+      )
       : undefined
 
     return dbStudentToFrontend(student, courseName)
@@ -194,6 +194,9 @@ export async function createStudent(student: CreateStudentData): Promise<Student
 
   if (!user) throw new Error("Usuario no autenticado")
 
+  // Generar código único para el estudiante
+  const studentCode = await generateUniqueStudentCode(student.firstName, student.lastName, student.courseId, user.id)
+
   const insertData = {
     first_name: student.firstName,
     last_name: student.lastName,
@@ -211,7 +214,8 @@ export async function createStudent(student: CreateStudentData): Promise<Student
 
     grades: student.grades ?? { p1: [], p2: [], p3: [], p4: [] },
 
-    user_id: user.id, // 🔥 CLAVE
+    user_id: user.id,
+    student_code: studentCode,
   }
 
   const { data, error } = await supabase
@@ -256,7 +260,7 @@ export async function updateStudent(
   if (updates.lastName !== undefined) dbUpdates.last_name = updates.lastName
   if (updates.courseId !== undefined) dbUpdates.course_id = updates.courseId
   if (updates.notes !== undefined) dbUpdates.notes = updates.notes
-  
+
   // Campos de acudiente
   if (updates.guardianName !== undefined) dbUpdates.guardian_name = updates.guardianName
   if (updates.guardianPhone !== undefined) dbUpdates.guardian_phone = updates.guardianPhone
@@ -325,4 +329,42 @@ async function updateCourseStudentCount(courseId: string): Promise<void> {
     .from("courses")
     .update({ students_count: count ?? 0 })
     .eq("id", courseId)
+}
+
+async function generateUniqueStudentCode(firstName: string, lastName: string, courseId: string | undefined, userId: string): Promise<string> {
+  // 1. Obtener iniciales
+  const fullName = `${firstName} ${lastName}`.trim()
+  const nameParts = fullName.split(/\s+/).filter(Boolean)
+  const initials = nameParts.map(p => p.charAt(0).toLowerCase()).join("")
+
+  // 2. Obtener números del grado
+  let gradePart = ""
+  if (courseId) {
+    const { data: course } = await supabase
+      .from("courses")
+      .select("grade, group_number")
+      .eq("id", courseId)
+      .single()
+
+    if (course) {
+      gradePart = `${course.grade}${course.group_number}`
+    }
+  }
+
+  const baseCode = `${initials}${gradePart}`
+
+  // 3. Verificar si existe y manejar duplicados
+  let finalCode = baseCode
+  const { data: existing } = await supabase
+    .from("students")
+    .select("student_code")
+    .eq("user_id", userId)
+    .eq("student_code", baseCode)
+    .maybeSingle()
+
+  if (existing) {
+    finalCode = `${initials}_${gradePart}`
+  }
+
+  return finalCode
 }
